@@ -29,14 +29,15 @@ class DRDataset(Dataset):
         return len(self.labels)
 
     def __getitem__(self, idx):
-        img_name = os.path.join(self.img_dir, self.labels.iloc[idx, 0] + '.jpeg')
-        image = Image.open(img_name).convert('RGB')
+        img_filename = self.labels.iloc[idx, 0] + '.jpeg'
+        img_path = os.path.join(self.img_dir, img_filename)
+        image = Image.open(img_path).convert('RGB')
         label = int(self.labels.iloc[idx, 1])  # Convert label to integer
         
         if self.transform:
             image = self.transform(image)
 
-        return image, label
+        return image, label, img_filename 
 
 # ======== STEP 2: Define Data Transformations ========
 transform = transforms.Compose([
@@ -115,7 +116,8 @@ def train_model(model, dataloader, criterion, optimizer, num_epochs=10):
         all_labels = []
         all_preds = []
 
-        for images, labels in tqdm(dataloader):
+        for images, labels, filename in tqdm(dataloader):
+            print(filename)
             images, labels = images.to(device, non_blocking=True), labels.to(device, non_blocking=True)
             optimizer.zero_grad()
             
